@@ -1,0 +1,54 @@
+{% extends "base2.html" %}
+
+{% block title %}Sign Up{% endblock title %}
+
+{% block contents %}
+    <div class="card-header"><h3 class="text-center font-weight-light my-4">アカウントを作成</h3></div>
+    <div class="card-body">
+        <form method="post">
+            <!-- エラー対策（必須） -->
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+                <input class="form-control" id="id_student_number" name="student_number" type="text" placeholder="学生番号を入力" required />
+                <label for="id_student_number">学生番号</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input class="form-control" id="id_email" name="email" type="email" placeholder="name@example.com" required />
+                <label for="id_email">メールアドレス</label>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3 mb-md-0">
+                        <input class="form-control" id="id_password1" name="password1" type="password" placeholder="パスワードを入力" required />
+                        <label for="id_password1">Password</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3 mb-md-0">
+                        <input class="form-control" id="id_password2" name="password2" type="password" placeholder="パスワードを再入力" required />
+                        <label for="id_password2">Password（確認用）</label>
+                    </div>
+                </div>
+            </div>
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        {{ error }}<br>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    {{ error }}<br>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="mt-4 mb-0">
+                <div class="d-grid"><button class="btn btn-primary btn-block" type="submit">アカウント作成</button></div>
+            </div>
+        </form>
+    </div>
+    <div class="card-footer text-center py-3">
+        <div class="small"><a href="{% url "login" %}">ログインはこちら</a></div>
+    </div>
+{% endblock contents %}
+

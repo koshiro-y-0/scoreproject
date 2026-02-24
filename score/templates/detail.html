@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}詳細ページ{% endblock title %}
+
+{% block contents %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">科目一覧</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'score:index' %}">ダッシュボード</a></li>
+            <li class="breadcrumb-item active">科目詳細</li>
+        </ol>
+        
+        {% if user.is_authenticated %}
+            <div class="row">
+                {% for subject in subjects %}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-{{ subject.color }} text-white mb-4">
+                        <!-- 科目画像エリア（後で画像を追加できる） -->
+                        <div class="card-img-top-wrapper" style="background-color: rgba(0,0,0,0.1); height: 120px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-book fa-3x" style="opacity: 0.3;"></i>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">{{ subject.name }}</h5>
+                            <div class="subject-stats">
+                                {% if subject.latest_score is not None %}
+                                    <p class="mb-1"><small>最新: {{ subject.latest_score }}点</small></p>
+                                    <p class="mb-0"><small>記録数: {{ subject.count }}件</small></p>
+                                {% else %}
+                                    <p class="mb-0"><small>データなし</small></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="{% url 'score:subject_detail' subject.id %}">詳細を見る</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if not subjects %}
+            <div class="alert alert-info">
+                <p>科目が登録されていません。管理画面から科目を追加してください。</p>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-warning">
+                <p>科目詳細を表示するには<a href="{% url 'login' %}">ログイン</a>してください。</p>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+{% endblock contents %}

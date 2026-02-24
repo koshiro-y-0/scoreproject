@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}プロフィール編集{% endblock title %}
+
+{% block contents %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">プロフィール編集</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'mypage' %}">マイページ</a></li>
+        <li class="breadcrumb-item active">編集</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-edit me-1"></i>
+                    プロフィール情報を編集
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">姓</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">名</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">メールアドレス</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.grade.id_for_label }}" class="form-label">学年</label>
+                            {{ form.grade }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">更新</button>
+                        <a href="{% url 'mypage' %}" class="btn btn-secondary">キャンセル</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contents %}

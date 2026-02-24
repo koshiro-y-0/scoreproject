@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}掲示板{% endblock title %}
+
+{% block contents %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">掲示板</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{% url 'score:index' %}">ダッシュボード</a></li>
+            <li class="breadcrumb-item active">掲示板</li>
+        </ol>
+        
+        <!-- カード表示 -->
+        <div class="row">
+            <div class="col-xl-6 col-md-6">
+                <div class="card bg-primary text-white mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">コメント一覧</h5>
+                        <p class="card-text">投稿されたコメントを確認できます</p>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="{% url 'omb:list' %}">一覧を見る</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-6 col-md-6">
+                <div class="card bg-success text-white mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">新規投稿</h5>
+                        <p class="card-text">新しいコメントを投稿できます</p>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="{% url 'omb:post' %}">投稿する</a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock contents %}

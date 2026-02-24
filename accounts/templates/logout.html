@@ -1,0 +1,25 @@
+{% extends "base2.html" %}
+
+{% block title %}Logout{% endblock title %}
+
+{% block contents %}
+<div class="card-header">
+    <h3 class="text-center font-weight-light my-4">
+        <i class="fas fa-sign-out-alt me-2"></i>Logout
+    </h3>
+</div>
+<div class="card-body text-center">
+    <div class="mb-4">
+        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+    </div>
+    <p class="mb-4">ログアウトしました。</p>
+    <p class="mb-4">ご利用ありがとうございました。</p>
+    <div class="d-grid gap-2">
+        <a href="{% url 'login' %}" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt me-1"></i>
+            ログインページへ
+        </a>
+    </div>
+</div>
+
+{% endblock contents %}

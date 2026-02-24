@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}マイページ{% endblock title %}
+
+{% block contents %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">マイページ</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">My Page</li>
+    </ol>
+
+    <!-- ユーザー情報カード -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user me-1"></i>
+                    プロフィール情報
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th style="width: 30%;">学生番号</th>
+                            <td>{{ user.student_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>名前</th>
+                            <td>{{ user.last_name }} {{ user.first_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>学年</th>
+                            <td>
+                                {% if user.grade %}
+                                    {{ user.get_grade_display }}
+                                {% else %}
+                                    未設定
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>メールアドレス</th>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                    </table>
+                    <a href="{% url 'profile-edit' %}" class="btn btn-primary">プロフィール編集</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成績サマリー -->
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-1"></i>
+                    成績サマリー
+                </div>
+                <div class="card-body">
+                    {% if subject_scores %}
+                        <p>登録科目数: <strong>{{ subject_scores|length }}</strong></p>
+                        <p>総記録数: <strong>{{ recent_scores|length }}</strong></p>
+                    {% else %}
+                        <p class="text-muted">まだ成績が登録されていません</p>
+                        <a href="{% url 'score:in-score' %}" class="btn btn-success">成績を入力する</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 科目別成績一覧 -->
+    {% if subject_scores %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            科目別成績一覧
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>科目名</th>
+                        <th>最新得点</th>
+                        <th>取得日</th>
+                        <th>平均点</th>
+                        <th>記録数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in subject_scores %}
+                    <tr>
+                        <td><strong>{{ item.subject }}</strong></td>
+                        <td>
+                            <span class="badge 
+                                {% if item.latest_score >= 80 %}bg-success
+                                {% elif item.latest_score >= 60 %}bg-primary
+                                {% else %}bg-danger
+                                {% endif %}">
+                                {{ item.latest_score }}点
+                            </span>
+                        </td>
+                        <td>{{ item.latest_date }}</td>
+                        <td>{{ item.average_score }}点</td>
+                        <td>{{ item.count }}回</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 最近の成績記録 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-history me-1"></i>
+            最近の成績記録
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>科目</th>
+                        <th>得点</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for score in recent_scores %}
+                    <tr>
+                        <td>{{ score.date }}</td>
+                        <td>{{ score.subject.subject }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if score.score >= 80 %}bg-success
+                                {% elif score.score >= 60 %}bg-primary
+                                {% else %}bg-danger
+                                {% endif %}">
+                                {{ score.score }}点
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock contents %}
