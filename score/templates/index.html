@@ -32,8 +32,18 @@
         </div>
     </div>
 
+    <!-- 科目別スコア推移グラフ -->
+    <h4 class="mt-2 mb-3"><i class="fas fa-chart-line me-2"></i>科目別スコア推移</h4>
+    <div class="row" id="chart-container">
+        <!-- JavaScriptで動的に生成 -->
+    </div>
+    <!-- データなしメッセージ（初期非表示） -->
+    <div id="no-chart-message" class="alert alert-secondary d-none" role="alert">
+        <i class="fas fa-info-circle me-1"></i> グラフを表示するには成績データを入力してください。
+    </div>
+
     <!-- 最近の成績記録 -->
-    <div class="card mb-4">
+    <div class="card mb-4 mt-3">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
             最近の成績記録
@@ -64,4 +74,100 @@
         </div>
     </div>
 </div>
+
+<!-- 科目別グラフ描画スクリプト -->
+<script>
+(function () {
+    // Djangoビューから渡されたJSON文字列をパース
+    var subjectsData = {{ subjects_chart_data|safe }};
+
+    var container = document.getElementById('chart-container');
+    var noDataMsg = document.getElementById('no-chart-message');
+
+    if (!subjectsData || subjectsData.length === 0) {
+        // データがない場合はメッセージを表示
+        noDataMsg.classList.remove('d-none');
+        return;
+    }
+
+    // 科目ごとにカードとグラフを生成
+    subjectsData.forEach(function (subject, index) {
+        // カラム要素を作成（2列レイアウト）
+        var col = document.createElement('div');
+        col.className = 'col-xl-6 col-md-12 mb-4';
+
+        // カード要素を作成
+        col.innerHTML =
+            '<div class="card shadow-sm h-100">' +
+                '<div class="card-header d-flex align-items-center">' +
+                    '<i class="fas fa-chart-line me-2"></i>' +
+                    '<strong>' + subject.subject_name + '</strong>' +
+                    '<span class="ms-auto badge bg-secondary">' + subject.data.length + '件</span>' +
+                '</div>' +
+                '<div class="card-body">' +
+                    '<canvas id="chart-' + index + '" height="160"></canvas>' +
+                '</div>' +
+            '</div>';
+
+        container.appendChild(col);
+
+        // Chart.js 2.x でラインチャートを描画
+        var ctx = document.getElementById('chart-' + index).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: subject.labels,
+                datasets: [{
+                    label: subject.subject_name,
+                    data: subject.data,
+                    backgroundColor: subject.bg_color,
+                    borderColor: subject.border_color,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    lineTension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            max: 100,
+                            stepSize: 20,
+                            callback: function (value) {
+                                return value + '点';
+                            }
+                        },
+                        gridLines: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    }],
+                    xAxes: [{
+                        ticks: {
+                            maxTicksLimit: 8
+                        },
+                        gridLines: {
+                            display: false
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            return tooltipItem.yLabel + '点';
+                        }
+                    }
+                }
+            }
+        });
+    });
+})();
+</script>
 {% endblock contents %}

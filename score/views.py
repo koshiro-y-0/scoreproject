@@ -16,27 +16,65 @@ from django.contrib.auth.decorators import login_required
 # 成績入力用のモデル（DB）をインポート
 from .models import Score, Subject
 
+import json
+
 
 ''' ホームページ '''
 @method_decorator(login_required, name='dispatch')
 class IndexView(TemplateView):
     template_name = 'index.html'
-    
+
+    # グラフ用のカラーパレット（背景色・枠線色）
+    CHART_COLORS = [
+        {'bg': 'rgba(78, 115, 223, 0.2)',  'border': 'rgba(78, 115, 223, 1)'},
+        {'bg': 'rgba(28, 200, 138, 0.2)',  'border': 'rgba(28, 200, 138, 1)'},
+        {'bg': 'rgba(246, 194, 62, 0.2)',  'border': 'rgba(246, 194, 62, 1)'},
+        {'bg': 'rgba(231, 74, 59, 0.2)',   'border': 'rgba(231, 74, 59, 1)'},
+        {'bg': 'rgba(54, 185, 204, 0.2)',  'border': 'rgba(54, 185, 204, 1)'},
+        {'bg': 'rgba(133, 135, 150, 0.2)', 'border': 'rgba(133, 135, 150, 1)'},
+    ]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # ログインユーザーの全成績を取得
         user_scores = Score.objects.filter(user=self.request.user)
-        
+
         # 統計情報
         context['total_records'] = user_scores.count()
-        
+
         # 登録科目数
         context['total_subjects'] = user_scores.values('subject').distinct().count()
-        
+
         # 最近の成績記録（5件）
         context['recent_scores'] = user_scores.order_by('-date')[:5]
-        
+
+        # 科目別グラフデータ（DBから取得）
+        subjects_chart_data = []
+        subjects = Subject.objects.all()
+
+        for index, subject in enumerate(subjects):
+            # 該当科目の成績を日付昇順で取得
+            scores = Score.objects.filter(
+                user=self.request.user,
+                subject=subject
+            ).order_by('date')
+
+            if scores.exists():
+                color = self.CHART_COLORS[index % len(self.CHART_COLORS)]
+                subjects_chart_data.append({
+                    'subject_name': subject.subject,
+                    'labels': [str(s.date) for s in scores],
+                    'data': [s.score for s in scores],
+                    'bg_color': color['bg'],
+                    'border_color': color['border'],
+                })
+
+        # テンプレートへJSON文字列として渡す
+        context['subjects_chart_data'] = json.dumps(
+            subjects_chart_data, ensure_ascii=False
+        )
+
         return context
 
 
