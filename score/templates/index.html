@@ -74,8 +74,10 @@
         </div>
     </div>
 </div>
+{% endblock contents %}
 
-<!-- 科目別グラフ描画スクリプト -->
+<!-- Chart.js 読み込み後に実行されるスクリプト -->
+{% block extra_scripts %}
 <script>
 (function () {
     // Djangoビューから渡されたJSON文字列をパース
@@ -170,4 +172,4 @@
     });
 })();
 </script>
-{% endblock contents %}
+{% endblock extra_scripts %}
