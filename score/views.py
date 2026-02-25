@@ -160,12 +160,28 @@ class SubjectScoreListView(ListView):
         # 統計情報を計算
         scores = self.get_queryset()
         if scores.exists():
-            context['max_score'] = max(s.score for s in scores)
-            context['min_score'] = min(s.score for s in scores)
-            context['total_count'] = scores.count()
+            score_values = [s.score for s in scores]
+            count = len(score_values)
+            latest = score_values[0]
+
+            context['latest_score'] = latest
+            context['max_score']    = max(score_values)
+            context['min_score']    = min(score_values)
+            context['avg_score']    = round(sum(score_values) / count, 1)
+            context['total_count']  = count
+
+            if latest >= 80:
+                context['latest_bar_color'] = 'success'
+            elif latest >= 60:
+                context['latest_bar_color'] = 'warning'
+            else:
+                context['latest_bar_color'] = 'danger'
         else:
-            context['max_score'] = None
-            context['min_score'] = None
-            context['total_count'] = 0
-        
+            context['latest_score']     = None
+            context['max_score']        = None
+            context['min_score']        = None
+            context['avg_score']        = None
+            context['total_count']      = 0
+            context['latest_bar_color'] = 'secondary'
+
         return context
