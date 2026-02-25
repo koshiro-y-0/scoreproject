@@ -16,23 +16,10 @@ from django.contrib.auth.decorators import login_required
 # 成績入力用のモデル（DB）をインポート
 from .models import Score, Subject
 
-import json
-
-
 ''' ホームページ '''
 @method_decorator(login_required, name='dispatch')
 class IndexView(TemplateView):
     template_name = 'index.html'
-
-    # グラフ用のカラーパレット（背景色・枠線色）
-    CHART_COLORS = [
-        {'bg': 'rgba(78, 115, 223, 0.2)',  'border': 'rgba(78, 115, 223, 1)'},
-        {'bg': 'rgba(28, 200, 138, 0.2)',  'border': 'rgba(28, 200, 138, 1)'},
-        {'bg': 'rgba(246, 194, 62, 0.2)',  'border': 'rgba(246, 194, 62, 1)'},
-        {'bg': 'rgba(231, 74, 59, 0.2)',   'border': 'rgba(231, 74, 59, 1)'},
-        {'bg': 'rgba(54, 185, 204, 0.2)',  'border': 'rgba(54, 185, 204, 1)'},
-        {'bg': 'rgba(133, 135, 150, 0.2)', 'border': 'rgba(133, 135, 150, 1)'},
-    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,31 +36,35 @@ class IndexView(TemplateView):
         # 最近の成績記録（5件）
         context['recent_scores'] = user_scores.order_by('-date')[:5]
 
-        # 科目別グラフデータ（DBから取得）
-        subjects_chart_data = []
-        subjects = Subject.objects.all()
-
-        for index, subject in enumerate(subjects):
-            # 該当科目の成績を日付昇順で取得
-            scores = Score.objects.filter(
+        # 科目別の最新スコア一覧
+        subjects_latest = []
+        for subject in Subject.objects.all():
+            latest = Score.objects.filter(
                 user=self.request.user,
                 subject=subject
-            ).order_by('date')
+            ).order_by('-date').first()
 
-            if scores.exists():
-                color = self.CHART_COLORS[index % len(self.CHART_COLORS)]
-                subjects_chart_data.append({
-                    'subject_name': subject.subject,
-                    'labels': [str(s.date) for s in scores],
-                    'data': [s.score for s in scores],
-                    'bg_color': color['bg'],
-                    'border_color': color['border'],
-                })
+            if latest is None:
+                bar_color = 'secondary'
+                score_val = None
+            elif latest.score >= 80:
+                bar_color = 'success'
+                score_val = latest.score
+            elif latest.score >= 60:
+                bar_color = 'warning'
+                score_val = latest.score
+            else:
+                bar_color = 'danger'
+                score_val = latest.score
 
-        # テンプレートへJSON文字列として渡す
-        context['subjects_chart_data'] = json.dumps(
-            subjects_chart_data, ensure_ascii=False
-        )
+            subjects_latest.append({
+                'id': subject.id,
+                'name': subject.subject,
+                'score': score_val,
+                'bar_color': bar_color,
+            })
+
+        context['subjects_latest'] = subjects_latest
 
         return context
 
