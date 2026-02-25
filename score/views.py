@@ -101,33 +101,44 @@ class SubjectDetailView(TemplateView):
         # 各科目の統計情報を計算
         subject_list = []
         colors = ['primary', 'warning', 'success', 'danger', 'info', 'secondary']
-        
+
         for index, subject in enumerate(subjects):
-            if self.request.user.is_authenticated:
-                # ログインユーザーの該当科目の成績を取得
-                scores = Score.objects.filter(
-                    user=self.request.user,
-                    subject=subject
-                ).order_by('-date')
-                
-                # 最新の得点を取得
-                latest_score = scores.first()
-                latest_score_value = latest_score.score if latest_score else None
-                
-                # データ件数
-                score_count = scores.count()
+            scores = Score.objects.filter(
+                user=self.request.user,
+                subject=subject
+            ).order_by('-date')
+
+            score_count = scores.count()
+
+            if score_count > 0:
+                score_values = [s.score for s in scores]
+                latest_score  = score_values[0]
+                max_score     = max(score_values)
+                min_score     = min(score_values)
+                avg_score     = round(sum(score_values) / score_count, 1)
+
+                if latest_score >= 80:
+                    bar_color = 'success'
+                elif latest_score >= 60:
+                    bar_color = 'warning'
+                else:
+                    bar_color = 'danger'
             else:
-                latest_score_value = None
-                score_count = 0
-            
+                latest_score = max_score = min_score = avg_score = None
+                bar_color = 'secondary'
+
             subject_list.append({
-                'id': subject.id,
-                'name': subject.subject,
-                'latest_score': latest_score_value,
-                'count': score_count,
-                'color': colors[index % len(colors)]
+                'id':           subject.id,
+                'name':         subject.subject,
+                'latest_score': latest_score,
+                'max_score':    max_score,
+                'min_score':    min_score,
+                'avg_score':    avg_score,
+                'count':        score_count,
+                'color':        colors[index % len(colors)],
+                'bar_color':    bar_color,
             })
-        
+
         context['subjects'] = subject_list
         
         return context
