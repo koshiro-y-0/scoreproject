@@ -28,8 +28,10 @@ class OmbListView(ListView):
         return queryset
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # サイドバーやフィルタ用に科目一覧を取得
         context['subjects'] = Subject.objects.all()
+        # フィルタ中の科目IDをテンプレートへ渡す（アクティブ状態の表示用）
+        subject_id = self.request.GET.get('subject')
+        context['current_subject_id'] = int(subject_id) if subject_id else None
         return context
 
 ''' コメントを投稿 '''
